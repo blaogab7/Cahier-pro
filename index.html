@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f4d2e">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<title>Cahier Pro</title>
+<style>
+:root{--vert:#0f4d2e;--vert2:#1b6b43;--orange:#f28c1e;--fond:#fff;--texte:#1a2420;--gris:#e6ebe8;--rouge:#c0392b}
+*{box-sizing:border-box}
+body{margin:0;font:18px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texte);background:var(--fond)}
+main{max-width:480px;margin:0 auto;min-height:100vh;padding:24px 20px 40px;display:none;flex-direction:column}
+main.actif{display:flex}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:26px;color:var(--vert)}
+.logo svg{width:44px;height:44px}
+.accueil{background:var(--vert);color:#fff;justify-content:space-between}
+.accueil .logo{color:#fff}
+.accueil h1{font-size:32px;line-height:1.15;margin:48px 0 12px}
+.accueil p{opacity:.85;margin:0}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:18px;font:700 19px inherit;font-family:inherit;cursor:pointer;margin-top:12px;text-align:center}
+.btn.orange{background:var(--orange);color:#1a1200}
+.btn.blanc{background:#fff;color:var(--vert)}
+.btn.vert{background:var(--vert);color:#fff}
+.btn:disabled{opacity:.6}
+label{display:block;font-weight:600;margin:16px 0 6px}
+input,select{width:100%;padding:15px;border:2px solid var(--gris);border-radius:12px;font:inherit;background:#fff}
+input:focus,select:focus,.btn:focus-visible{outline:3px solid var(--orange);border-color:var(--orange)}
+.retour{background:none;border:0;color:var(--vert);font:600 17px inherit;font-family:inherit;padding:8px 0;align-self:flex-start;cursor:pointer}
+h2{color:var(--vert);margin:8px 0 0}
+.erreur{background:#fdecea;color:var(--rouge);padding:12px;border-radius:10px;margin-top:14px;display:none}
+.lien{background:none;border:0;color:var(--vert);text-decoration:underline;font:inherit;margin-top:18px;cursor:pointer}
+#statut{position:fixed;top:0;left:0;right:0;text-align:center;font-size:14px;padding:4px;color:#fff;background:var(--vert2)}
+#statut.off{background:var(--rouge)}
+#statut.sync{background:var(--orange);color:#1a1200}
+body{padding-top:26px}
+.entete{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.petit{font-size:15px;color:#55625b}
+.quitter{background:none;border:2px solid var(--gris);border-radius:10px;padding:8px 12px;font:600 15px inherit;font-family:inherit;color:var(--vert);cursor:pointer}
+.gros{margin:14px 0 8px}
+.grille{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.carte{border:2px solid var(--gris);border-radius:14px;padding:14px}
+.carte.large{grid-column:1/-1;background:var(--vert);color:#fff;border-color:var(--vert)}
+.carte .lib{font-size:15px;opacity:.8}.carte .val{font-size:24px;font-weight:800;margin-top:2px}
+.carte.alerte{border-color:var(--rouge)}.carte.alerte .val{color:var(--rouge)}
+.rappel{display:none;background:#fff4e5;border:2px solid var(--orange);border-radius:12px;padding:12px;margin-top:14px;font-size:16px}
+main{padding-bottom:96px}
+h3{color:var(--vert);margin:22px 0 8px}
+#nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:2px solid var(--gris);justify-content:space-around;padding:6px 0 8px;z-index:5}
+#nav button{background:none;border:0;font:600 13px inherit;font-family:inherit;color:#55625b;padding:6px 8px;cursor:pointer;flex:1}
+#nav button.on{color:var(--vert);border-top:3px solid var(--orange);margin-top:-6px;padding-top:9px}
+.it{border:2px solid var(--gris);border-radius:12px;padding:12px;margin-bottom:10px}
+.it b{font-size:19px}.it .sub{font-size:14px;color:#55625b}
+.mini{display:inline-block;border:0;border-radius:10px;padding:10px 14px;font:700 15px inherit;font-family:inherit;margin:8px 8px 0 0;cursor:pointer;background:var(--vert);color:#fff}
+.mini.or{background:var(--orange);color:#1a1200}.mini.gr{background:var(--gris);color:var(--texte)}
+.rouge{background:#fdecea;color:var(--rouge);border-radius:8px;padding:8px;margin-top:8px;font-weight:600}
+.vide{color:#55625b;text-align:center;padding:16px}
+#toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--vert);color:#fff;padding:12px 18px;border-radius:12px;display:none;z-index:9;font-weight:600}
+</style>
+</head>
+<body>
+<div id="statut">Synchronisé</div>
+
+<!-- ACCUEIL -->
+<main id="accueil" class="accueil actif">
+  <div class="logo"><svg viewBox="0 0 48 48"><rect x="6" y="4" width="36" height="40" rx="5" fill="#fff"/><rect x="22" y="4" width="3" height="40" fill="#f28c1e"/><rect x="28" y="14" width="9" height="3" fill="#0f4d2e"/><rect x="28" y="22" width="9" height="3" fill="#0f4d2e"/><rect x="28" y="30" width="9" height="3" fill="#0f4d2e"/></svg>Cahier Pro</div>
+  <div><h1>Vos ventes, crédits et stock, dans un seul cahier.</h1><p>Marche même sans Internet.</p></div>
+  <div>
+    <button class="btn orange" data-va="inscription">Créer mon compte</button>
+    <button class="btn blanc" data-va="connexion">Se connecter</button>
+  </div>
+</main>
+
+<!-- INSCRIPTION -->
+<main id="inscription">
+  <button class="retour" data-va="accueil">← Retour</button>
+  <h2>Créer mon compte</h2>
+  <form id="f-inscription" novalidate>
+    <label for="nom">Votre nom complet</label><input id="nom" autocomplete="name" required>
+    <label for="tel">Numéro de téléphone</label><input id="tel" type="tel" inputmode="tel" value="+237 " autocomplete="tel" required>
+    <label for="mdp">Mot de passe (6 caractères minimum)</label><input id="mdp" type="password" autocomplete="new-password" required>
+    <label for="mdp2">Confirmez le mot de passe</label><input id="mdp2" type="password" autocomplete="new-password" required>
+    <label for="boutique">Nom de votre boutique</label><input id="boutique" required>
+    <label for="type">Type de commerce</label>
+    <select id="type"><option>Vêtements</option><option>Alimentation</option><option>Cosmétiques</option><option>Téléphone</option><option>Coiffure</option><option>Restaurant</option><option>Autre</option></select>
+    <label for="ville">Ville</label>
+    <select id="ville"><option>Douala</option><option>Yaoundé</option><option>Bafoussam</option><option>Garoua</option><option>Autre</option></select>
+    <div class="erreur" id="e-inscription"></div>
+    <button class="btn vert" type="submit">Créer mon compte</button>
+  </form>
+  <p style="text-align:center;color:#55625b">30 jours gratuits, sans paiement.</p>
+</main>
+
+<!-- CONNEXION -->
+<main id="connexion">
+  <button class="retour" data-va="accueil">← Retour</button>
+  <h2>Se connecter</h2>
+  <form id="f-connexion" novalidate>
+    <label for="c-tel">Numéro de téléphone</label><input id="c-tel" type="tel" inputmode="tel" value="+237 " autocomplete="tel">
+    <label for="c-mdp">Mot de passe</label><input id="c-mdp" type="password" autocomplete="current-password">
+    <div class="erreur" id="e-connexion"></div>
+    <button class="btn vert" type="submit">Se connecter</button>
+  </form>
+  <button class="lien" id="oublie">Mot de passe oublié</button>
+</main>
+
+<!-- TABLEAU DE BORD (étape 4) -->
+<main id="tableau">
+  <div class="entete"><div><div class="petit" id="t-boutique"></div><h2 id="bienvenue">Bienvenue !</h2></div><button class="quitter" id="deco">Quitter</button></div>
+  <div class="rappel" id="rappel"></div>
+  <div class="gros">
+    <button class="btn orange" id="b-vente">+ Ajouter une vente</button>
+    <button class="btn vert" id="b-depense">+ Ajouter une dépense</button>
+  </div>
+  <div class="grille">
+    <div class="carte"><div class="lib">Ventes du jour</div><div class="val" id="t-ventes">0 FCFA</div></div>
+    <div class="carte"><div class="lib">Dépenses du jour</div><div class="val" id="t-depenses">0 FCFA</div></div>
+    <div class="carte large"><div class="lib">Bénéfice estimé du jour</div><div class="val" id="t-benefice">0 FCFA</div></div>
+    <div class="carte"><div class="lib">Crédits à récupérer</div><div class="val" id="t-credits">0 FCFA</div></div>
+    <div class="carte"><div class="lib">Produits en stock</div><div class="val" id="t-stock">0</div></div>
+    <div class="carte" id="c-rupture"><div class="lib">Bientôt en rupture</div><div class="val" id="t-rupture">0</div></div>
+    <div class="carte"><div class="lib">Jours restants</div><div class="val" id="t-jours">–</div></div>
+  </div>
+  <div style="margin-top:14px"><button class="mini gr" data-va="activite">Activité récente</button><button class="mini gr" data-va="profil">Mon profil</button><button class="mini gr" data-va="abonnement">S'abonner</button><button class="mini or" id="b-admin" data-va="admin" style="display:none">Administration</button></div>
+</main>
+
+
+<main id="ventes"><h2>Ventes</h2>
+<div class="grille"><div class="carte large"><div class="lib">Ventes du jour</div><div class="val" id="v-j">0 FCFA</div></div>
+<div class="carte"><div class="lib">Cette semaine</div><div class="val" id="v-s">0 FCFA</div></div>
+<div class="carte"><div class="lib">Ce mois</div><div class="val" id="v-m">0 FCFA</div></div></div>
+<form id="f-vente" novalidate>
+<label for="v-produit">Produit ou service</label><input id="v-produit" type="text" list="dl-produits"><datalist id="dl-produits"></datalist>
+<label for="v-montant">Montant (FCFA)</label><input id="v-montant" type="number" inputmode="numeric" min="0">
+<label for="v-mode">Mode de paiement</label><select id="v-mode"><option value="especes">Espèces</option><option value="mtn">MTN Mobile Money</option><option value="orange">Orange Money</option><option value="credit">À crédit</option></select>
+<div id="v-client" style="display:none"><label for="v-cnom">Nom du client</label><input id="v-cnom" type="text" list="dl-clients"><datalist id="dl-clients"></datalist><label for="v-cwa">WhatsApp du client (facultatif)</label><input id="v-cwa" type="tel" ></div>
+<label for="v-note">Note (facultatif)</label><input id="v-note" type="text" >
+<div class="erreur" id="e-vente"></div><button class="btn orange" type="submit">Enregistrer la vente</button></form>
+<h3>Ventes du jour</h3><div id="l-ventes"></div></main>
+
+<main id="depenses"><h2>Dépenses</h2>
+<div class="grille"><div class="carte large"><div class="lib">Dépenses du jour</div><div class="val" id="d-j">0 FCFA</div></div>
+<div class="carte"><div class="lib">Cette semaine</div><div class="val" id="d-s">0 FCFA</div></div>
+<div class="carte"><div class="lib">Ce mois</div><div class="val" id="d-m">0 FCFA</div></div></div>
+<form id="f-depense" novalidate><label for="d-motif">Motif (ex. transport, loyer)</label><input id="d-motif" type="text" ><label for="d-montant">Montant (FCFA)</label><input id="d-montant" type="number" inputmode="numeric" min="0"><label for="d-note">Note (facultatif)</label><input id="d-note" type="text" >
+<div class="erreur" id="e-depense"></div><button class="btn vert" type="submit">Enregistrer la dépense</button></form>
+<h3>Dépenses du jour</h3><div id="l-depenses"></div></main>
+
+<main id="credits"><h2>Crédits clients</h2>
+<div class="grille"><div class="carte large"><div class="lib">Total à récupérer</div><div class="val" id="c-total">0 FCFA</div></div></div>
+<form id="f-credit" novalidate><label for="c-nom">Nom du client</label><input id="c-nom" type="text" ><label for="c-wa">Numéro WhatsApp (facultatif)</label><input id="c-wa" type="tel" ><label for="c-montant">Montant dû (FCFA)</label><input id="c-montant" type="number" inputmode="numeric" min="0"><label for="c-limite">Date limite (facultatif)</label><input id="c-limite" type="date" ><label for="c-note">Note (facultatif)</label><input id="c-note" type="text" >
+<div class="erreur" id="e-credit"></div><button class="btn vert" type="submit">Ajouter le crédit</button></form>
+<h3>Liste des crédits</h3><div id="l-credits"></div></main>
+
+<main id="stock"><h2>Stock</h2>
+<form id="f-stock" novalidate><label for="s-nom">Nom du produit</label><input id="s-nom" type="text" ><label for="s-qte">Quantité disponible</label><input id="s-qte" type="number" inputmode="numeric" min="0"><label for="s-seuil">Seuil d'alerte</label><input id="s-seuil" type="number" inputmode="numeric" min="0" value="2"><label for="s-prix">Prix de vente (FCFA)</label><input id="s-prix" type="number" inputmode="numeric" min="0"><label for="s-note">Note (facultatif)</label><input id="s-note" type="text" >
+<div class="erreur" id="e-stock"></div><button class="btn vert" type="submit">Ajouter le produit</button></form>
+<h3>Mes produits</h3><div id="l-stock"></div></main>
+
+
+<main id="abonnement"><button class="retour" data-va="tableau">← Accueil</button><h2>S'abonner</h2>
+<div class="carte large" style="margin-top:12px"><div class="lib">Cahier Pro, par mois</div><div class="val">2 000 FCFA</div></div>
+<p id="ab-etat" style="font-weight:600"></p>
+<div class="rappel" id="ab-verif">Paiement en vérification. Nous validons votre paiement très bientôt, merci de patienter.</div>
+<div id="ab-form"><label>Payer avec</label>
+<button class="btn blanc" style="border:2px solid var(--gris)" data-op="MTN">MTN Mobile Money</button>
+<button class="btn blanc" style="border:2px solid var(--gris)" data-op="Orange">Orange Money</button>
+<div class="it" id="ab-instr" style="display:none;margin-top:14px"></div>
+<label for="ab-ref">Numéro ou référence de la transaction</label><input id="ab-ref" type="text" >
+<div class="erreur" id="e-ab"></div><button class="btn orange" id="ab-paye">J'ai payé</button></div></main>
+
+<main id="profil"><button class="retour" data-va="tableau">← Accueil</button><h2>Mon profil</h2>
+<form id="f-profil" novalidate><label for="p-nom">Nom complet</label><input id="p-nom" type="text" ><label for="p-boutique">Nom de la boutique</label><input id="p-boutique" type="text" >
+<label for="p-type">Type de commerce</label><select id="p-type"></select><label for="p-ville">Ville</label><select id="p-ville"></select>
+<div class="erreur" id="e-profil"></div><button class="btn vert" type="submit">Enregistrer</button></form>
+<h3>Changer le mot de passe</h3>
+<form id="f-mdp" novalidate><label for="p-mdp">Nouveau mot de passe</label><input id="p-mdp" type="password" ><label for="p-mdp2">Confirmez le mot de passe</label><input id="p-mdp2" type="password" >
+<div class="erreur" id="e-mdp"></div><button class="btn vert" type="submit">Changer le mot de passe</button></form>
+<button class="btn blanc" style="border:2px solid var(--vert);margin-top:26px" id="deco2">Se déconnecter</button></main>
+
+<main id="activite"><button class="retour" data-va="tableau">← Accueil</button><h2>Activité récente</h2>
+<h3>Dernières ventes</h3><div id="a-ventes"></div><h3>Dernières dépenses</h3><div id="a-depenses"></div>
+<h3>Derniers crédits ajoutés</h3><div id="a-credits"></div><h3>Dernière synchronisation</h3><div id="a-sync" class="it"></div></main>
+
+<main id="admin"><button class="retour" data-va="tableau">← Accueil</button><h2>Administration</h2>
+<h3>Paiements à vérifier</h3><div id="ad-paiements"></div><h3>Commerçants</h3><div id="ad-users"></div></main>
+
+<nav id="nav"><button data-va="tableau">Accueil</button><button data-va="ventes">Ventes</button><button data-va="depenses">Dépenses</button><button data-va="credits">Crédits</button><button data-va="stock">Stock</button></nav>
+<div id="toast"></div>
+
+<script>
+// ---------- Navigation entre écrans ----------
+const PAGES=["tableau","ventes","depenses","credits","stock"];
+function aller(id){
+  document.querySelectorAll("main").forEach(m=>m.classList.toggle("actif",m.id===id));
+  document.getElementById("nav").style.display=PAGES.includes(id)?"flex":"none";
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.va===id));
+  scrollTo(0,0);rendre(id);
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-va]");if(b)aller(b.dataset.va)});
+
+// ---------- Outils ----------
+// Normalise un numéro camerounais en +2376XXXXXXXX (9 chiffres après 237, commence par 6 ou 2).
+function normaliserTel(t){
+  let n=t.replace(/[^\d]/g,"");
+  if(n.startsWith("237"))n=n.slice(3);
+  return /^[62]\d{8}$/.test(n)?"+237"+n:null;
+}
+function montrerErreur(id,msg){const d=document.getElementById(id);d.textContent=msg;d.style.display=msg?"block":"none"}
+
+// ---------- Statut Internet (visible en haut) ----------
+document.getElementById("statut").textContent=navigator.onLine?"Synchronisé":"Hors connexion";
+
+// ---------- Connexion à la base de données Supabase ----------
+const SB_URL="https://vmasugcyryrivyrfsfxe.supabase.co";
+const SB_KEY="sb_publishable_FtBR_uK0Y7LCX87iEqPFNg_WbPH29bp"; // clé publique : sans danger
+// Le numéro sert d'identifiant : +237 6XX... devient 2376XX...@cahierpro.app (invisible pour le commerçant)
+const emailDe=tel=>tel.replace("+","")+"@cahierpro.app";
+
+async function sb(chemin,{methode="GET",corps,jeton,entetes}={}){
+  const h=Object.assign({apikey:SB_KEY,"Content-Type":"application/json"},entetes||{});
+  if(jeton)h.Authorization="Bearer "+jeton;
+  const r=await fetch(SB_URL+chemin,{method:methode,headers:h,body:corps?JSON.stringify(corps):undefined});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.msg||d.error_description||d.message||"Erreur");
+  return d;
+}
+function traduire(m){
+  m=(m||"").toLowerCase();
+  if(m.includes("already"))return "Ce numéro a déjà un compte. Cliquez sur « Se connecter ».";
+  if(m.includes("invalid login"))return "Numéro ou mot de passe incorrect.";
+  if(m.includes("failed to fetch")||m.includes("network"))return "Pas d'Internet. Réessayez quand la connexion revient.";
+  if(m.includes("rate"))return "Trop d'essais. Attendez une minute puis réessayez.";
+  return "Un problème est survenu. Réessayez.";
+}
+// La session reste sur le téléphone : le commerçant n'a pas à se reconnecter à chaque ouverture
+const lireSession=()=>{try{return JSON.parse(localStorage.getItem("cp_session"))}catch(e){return null}};
+const garderSession=d=>localStorage.setItem("cp_session",JSON.stringify({jeton:d.access_token,refresh:d.refresh_token,user:d.user}));
+
+// ---------- Stockage sur le téléphone (IndexedDB) ----------
+// Une base par commerçant : les données ne se mélangent jamais, même si deux personnes utilisent le même téléphone.
+let baseLocale=null;
+function ouvrirBase(uid){return new Promise((ok,ko)=>{
+  const r=indexedDB.open("cahierpro_"+uid,1);
+  r.onupgradeneeded=()=>{const d=r.result;
+    ["clients","ventes","depenses","credits","produits","file_attente"].forEach(n=>d.createObjectStore(n,{keyPath:"id"}));};
+  r.onsuccess=()=>ok(r.result);r.onerror=()=>ko(r.error);})}
+function tout(n){return new Promise((ok,ko)=>{
+  const q=baseLocale.transaction(n).objectStore(n).getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>ko(q.error);})}
+
+const fcfa=n=>Math.round(n).toLocaleString("fr-FR")+" FCFA";
+const $=id=>document.getElementById(id);
+function joursRestants(fin){return Math.ceil((new Date(fin)-Date.now())/864e5)}
+
+function rappelEssai(j,statut){
+  const r=$("rappel"),ab=statut==="actif";
+  let t;
+  if(j<=0)t=ab?"Votre abonnement est terminé. Renouvelez-le pour continuer à enregistrer vos ventes et protéger vos données."
+               :"Votre essai gratuit est terminé. Abonnez-vous pour continuer à enregistrer vos ventes et protéger vos données.";
+  else if(j<=7)t=(j===1?"Dernier jour ! ":"Il reste "+j+" jours. ")+(ab?"Votre abonnement se termine bientôt. Renouvelez-le":"Votre essai gratuit se termine bientôt. Abonnez-vous")+" pour continuer à enregistrer vos ventes et protéger vos données.";
+  else{r.style.display="none";return}
+  r.textContent=t+" Appuyez ici.";r.style.display="block";r.style.cursor="pointer";r.onclick=()=>aller("abonnement");
+}
+
+async function calculerTableau(){
+  const debut=new Date();debut.setHours(0,0,0,0);
+  const duJour=x=>new Date(x.cree_le)>=debut;
+  const [ventes,depenses,credits,produits]=await Promise.all(["ventes","depenses","credits","produits"].map(tout));
+  const v=ventes.filter(duJour).reduce((t,x)=>t+x.montant,0);
+  const d=depenses.filter(duJour).reduce((t,x)=>t+x.montant,0);
+  const rupt=produits.filter(p=>p.quantite<=p.seuil_alerte).length;
+  $("t-ventes").textContent=fcfa(v);$("t-depenses").textContent=fcfa(d);
+  $("t-benefice").textContent=fcfa(v-d); // Ventes - Dépenses
+  $("t-credits").textContent=fcfa(credits.filter(c=>c.statut==="en_attente").reduce((t,c)=>t+c.montant,0));
+  $("t-stock").textContent=produits.length;$("t-rupture").textContent=rupt;
+  $("c-rupture").classList.toggle("alerte",rupt>0);
+}
+
+async function ouvrirTableau(){
+  const ses=lireSession(); if(!ses)return aller("accueil");
+  const m=(ses.user&&ses.user.user_metadata)||{};
+  $("bienvenue").textContent="Bonjour"+(m.nom?", "+m.nom.split(" ")[0]:"")+" !";
+  $("t-boutique").textContent=m.boutique||"";
+  aller("tableau");
+  baseLocale=await ouvrirBase(ses.user.id);
+  await calculerTableau();
+  synchroniser();
+  // Jours restants : on le garde sur le téléphone pour l'afficher aussi hors connexion
+  const id=ses.user.id;
+  let fin=localStorage.getItem("cp_fin_acces_"+id),statut=localStorage.getItem("cp_statut_"+id)||"essai";
+  try{
+    const jt=await jeton();
+    const [ab]=await sb("/rest/v1/abonnements?select=fin_acces,statut&user_id=eq."+id,{jeton:jt});
+    if(ab){fin=ab.fin_acces;statut=ab.statut;localStorage.setItem("cp_fin_acces_"+id,fin);localStorage.setItem("cp_statut_"+id,statut);}
+    const [pr]=await sb("/rest/v1/profils?select=bloque&id=eq."+id,{jeton:jt});
+    if(pr)localStorage.setItem("cp_bloque_"+id,pr.bloque?"1":"");
+    const ad=await sb("/rest/v1/admins?select=user_id&user_id=eq."+id,{jeton:jt});
+    localStorage.setItem("cp_admin_"+id,ad.length?"1":"");
+  }catch(e){}
+  $("b-admin").style.display=localStorage.getItem("cp_admin_"+id)?"inline-block":"none";
+  if(fin){const j=joursRestants(fin);$("t-jours").textContent=Math.max(0,j);rappelEssai(j,statut);}
+  if(localStorage.getItem("cp_bloque_"+id)){const r=$("rappel");r.textContent="Votre compte est suspendu. Contactez Cahier Pro.";r.style.display="block";}
+}
+// Les pages Ventes et Dépenses arrivent à l'étape 5
+$("b-vente").addEventListener("click",()=>aller("ventes"));
+$("b-depense").addEventListener("click",()=>aller("depenses"));
+
+// ---------- Enregistrer sur le téléphone ----------
+const uid=()=>lireSession().user.id;
+const esc=t=>String(t==null?"":t).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const entier=v=>parseInt(String(v).replace(/\s/g,""),10);
+const quand=x=>new Date(x).toLocaleString("fr-FR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+function toast(m){const t=$("toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",2200)}
+function maintenant(){return new Date().toISOString()}
+function nouveau(extra){return Object.assign({id:crypto.randomUUID(),user_id:uid(),cree_le:maintenant(),maj_le:maintenant()},extra)}
+
+// Une seule opération : la donnée ET sa place dans la "file d'attente" de synchronisation sont écrites ensemble.
+// Si le téléphone s'éteint, rien ne se perd. L'envoi vers Internet viendra à l'étape 6.
+function ecrire(store,o){return new Promise((ok,ko)=>{
+  const t=baseLocale.transaction([store,"file_attente"],"readwrite");
+  t.objectStore(store).put(o);t.objectStore("file_attente").put({id:store+":"+o.id,store,rid:o.id});
+  t.oncomplete=()=>{ok();planifierSync()};t.onerror=()=>ko(t.error);})}
+
+// Après l'essai gratuit : consultation seulement
+function accesOk(){
+  const f=localStorage.getItem("cp_fin_acces_"+uid());
+  if(localStorage.getItem("cp_bloque_"+uid())){toast("Compte suspendu. Contactez Cahier Pro.");return false}
+  if(f&&new Date(f)<=Date.now()){toast("Accès terminé : abonnez-vous pour continuer.");aller("abonnement");return false}
+  return true;
+}
+const debuts=()=>{const j=new Date();j.setHours(0,0,0,0);
+  const s=new Date(j);s.setDate(j.getDate()-((j.getDay()+6)%7)); // lundi
+  return{j,s,m:new Date(j.getFullYear(),j.getMonth(),1)}};
+const somme=(l,d)=>l.filter(x=>new Date(x.cree_le)>=d).reduce((t,x)=>t+x.montant,0);
+const parDate=l=>l.slice().sort((a,b)=>new Date(b.cree_le)-new Date(a.cree_le));
+const MODES={especes:"Espèces",mtn:"MTN Mobile Money",orange:"Orange Money",credit:"À crédit"};
+
+async function rendre(id){
+  if(!baseLocale)return;
+  if(id==="tableau")return calculerTableau();
+  if(id==="abonnement")return rAbonnement();
+  if(id==="profil")return rProfil();
+  if(id==="activite")return rActivite();
+  if(id==="admin")return rAdmin();
+  const D=debuts();
+  if(id==="ventes"){
+    const [v,p,c]=await Promise.all([tout("ventes"),tout("produits"),tout("clients")]);
+    $("v-j").textContent=fcfa(somme(v,D.j));$("v-s").textContent=fcfa(somme(v,D.s));$("v-m").textContent=fcfa(somme(v,D.m));
+    $("dl-produits").innerHTML=p.map(x=>`<option value="${esc(x.nom)}">`).join("");
+    $("dl-clients").innerHTML=c.map(x=>`<option value="${esc(x.nom)}">`).join("");
+    const j=parDate(v.filter(x=>new Date(x.cree_le)>=D.j));
+    $("l-ventes").innerHTML=j.length?j.map(x=>`<div class="it"><b>${esc(x.produit)}</b> · ${fcfa(x.montant)}<div class="sub">${MODES[x.mode_paiement]} · ${quand(x.cree_le)}${x.note?" · "+esc(x.note):""}</div></div>`).join(""):'<div class="vide">Aucune vente aujourd\'hui.</div>';
+  }
+  if(id==="depenses"){
+    const d=await tout("depenses");
+    $("d-j").textContent=fcfa(somme(d,D.j));$("d-s").textContent=fcfa(somme(d,D.s));$("d-m").textContent=fcfa(somme(d,D.m));
+    const j=parDate(d.filter(x=>new Date(x.cree_le)>=D.j));
+    $("l-depenses").innerHTML=j.length?j.map(x=>`<div class="it"><b>${esc(x.motif)}</b> · ${fcfa(x.montant)}<div class="sub">${quand(x.cree_le)}${x.note?" · "+esc(x.note):""}</div></div>`).join(""):'<div class="vide">Aucune dépense aujourd\'hui.</div>';
+  }
+  if(id==="credits"){
+    const c=await tout("credits");
+    $("c-total").textContent=fcfa(c.filter(x=>x.statut==="en_attente").reduce((t,x)=>t+x.montant,0));
+    const l=c.slice().sort((a,b)=>(a.statut==="paye")-(b.statut==="paye")||new Date(b.date_credit)-new Date(a.date_credit));
+    $("l-credits").innerHTML=l.length?l.map(x=>`<div class="it"><b>${esc(x.nom_client)}</b> · ${fcfa(x.montant)}
+      <div class="sub">${x.statut==="paye"?"✔ Payé":"En attente"} · crédit du ${quand(x.date_credit)}${x.date_limite?" · à payer avant le "+new Date(x.date_limite).toLocaleDateString("fr-FR"):""}${x.note?" · "+esc(x.note):""}</div>
+      ${x.statut==="paye"?"":`<button class="mini or" data-act="wa" data-id="${x.id}">Rappeler sur WhatsApp</button><button class="mini" data-act="paye" data-id="${x.id}">Marquer comme payé</button>`}</div>`).join(""):'<div class="vide">Aucun crédit enregistré.</div>';
+  }
+  if(id==="stock"){
+    const p=(await tout("produits")).sort((a,b)=>a.nom.localeCompare(b.nom));
+    $("l-stock").innerHTML=p.length?p.map(x=>`<div class="it"><b>${esc(x.nom)}</b> · ${fcfa(x.prix_vente)}
+      <div class="sub">En stock : ${x.quantite}${x.note?" · "+esc(x.note):""}</div>
+      ${x.quantite<=x.seuil_alerte?`<div class="rouge">Attention : il reste seulement ${x.quantite} unité${x.quantite>1?"s":""} de ${esc(x.nom)}.</div>`:""}
+      <button class="mini gr" data-act="moins" data-id="${x.id}">− 1</button><button class="mini" data-act="plus" data-id="${x.id}">+ 1</button></div>`).join(""):'<div class="vide">Aucun produit. Ajoutez le premier ci-dessus.</div>';
+  }
+}
+
+// ---------- Formulaires ----------
+$("v-mode").addEventListener("change",e=>$("v-client").style.display=e.target.value==="credit"?"block":"none");
+
+$("f-vente").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-vente","");if(!accesOk())return;
+  const produit=$("v-produit").value.trim(),montant=entier($("v-montant").value),mode=$("v-mode").value;
+  if(!produit)return montrerErreur("e-vente","Entrez le produit ou le service.");
+  if(!(montant>0))return montrerErreur("e-vente","Entrez un montant en FCFA.");
+  let client=null;
+  if(mode==="credit"){
+    const nom=$("v-cnom").value.trim();if(!nom)return montrerErreur("e-vente","Entrez le nom du client pour une vente à crédit.");
+    const existant=(await tout("clients")).find(c=>c.nom.toLowerCase()===nom.toLowerCase());
+    client=existant||nouveau({nom,whatsapp:$("v-cwa").value.trim()||null});
+    if(!existant)await ecrire("clients",client);
+  }
+  const vente=nouveau({produit,montant,mode_paiement:mode,client_id:client?client.id:null,note:$("v-note").value.trim()||null});
+  await ecrire("ventes",vente);
+  if(client)await ecrire("credits",nouveau({client_id:client.id,nom_client:client.nom,whatsapp:client.whatsapp,montant,date_credit:vente.cree_le,date_limite:null,statut:"en_attente",note:produit}));
+  e.target.reset();$("v-client").style.display="none";toast("Vente enregistrée ✔");rendre("ventes");
+});
+
+$("f-depense").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-depense","");if(!accesOk())return;
+  const motif=$("d-motif").value.trim(),montant=entier($("d-montant").value);
+  if(!motif)return montrerErreur("e-depense","Entrez le motif de la dépense.");
+  if(!(montant>0))return montrerErreur("e-depense","Entrez un montant en FCFA.");
+  await ecrire("depenses",nouveau({motif,montant,note:$("d-note").value.trim()||null}));
+  e.target.reset();toast("Dépense enregistrée ✔");rendre("depenses");
+});
+
+$("f-credit").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-credit","");if(!accesOk())return;
+  const nom=$("c-nom").value.trim(),montant=entier($("c-montant").value);
+  if(!nom)return montrerErreur("e-credit","Entrez le nom du client.");
+  if(!(montant>0))return montrerErreur("e-credit","Entrez le montant dû.");
+  const wa=$("c-wa").value.trim()||null;
+  const existant=(await tout("clients")).find(c=>c.nom.toLowerCase()===nom.toLowerCase());
+  const client=existant||nouveau({nom,whatsapp:wa});
+  if(!existant)await ecrire("clients",client);
+  await ecrire("credits",nouveau({client_id:client.id,nom_client:nom,whatsapp:wa||client.whatsapp,montant,date_credit:maintenant(),date_limite:$("c-limite").value||null,statut:"en_attente",note:$("c-note").value.trim()||null}));
+  e.target.reset();toast("Crédit enregistré ✔");rendre("credits");
+});
+
+$("f-stock").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-stock","");if(!accesOk())return;
+  const nom=$("s-nom").value.trim(),quantite=entier($("s-qte").value),seuil=entier($("s-seuil").value),prix=entier($("s-prix").value);
+  if(!nom)return montrerErreur("e-stock","Entrez le nom du produit.");
+  if(!(quantite>=0))return montrerErreur("e-stock","Entrez la quantité disponible.");
+  await ecrire("produits",nouveau({nom,quantite,seuil_alerte:seuil>=0?seuil:2,prix_vente:prix>=0?prix:0,note:$("s-note").value.trim()||null}));
+  e.target.reset();$("s-seuil").value=2;toast("Produit ajouté ✔");rendre("stock");
+});
+
+// Boutons des listes : WhatsApp, payé, +1 / −1 en stock
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-act]");if(!b||!baseLocale)return;
+  const act=b.dataset.act,id=b.dataset.id;
+  if(act==="wa"){
+    const c=(await tout("credits")).find(x=>x.id===id);
+    const msg=`Bonjour ${c.nom_client}, petit rappel : il reste ${fcfa(c.montant)} à régler pour votre achat. Merci beaucoup.`;
+    let n=(c.whatsapp||"").replace(/\D/g,"");if(n&&!n.startsWith("237"))n="237"+n;
+    window.open("https://wa.me/"+n+"?text="+encodeURIComponent(msg),"_blank");
+  }
+  if(act==="paye"){if(!accesOk())return;const c=(await tout("credits")).find(x=>x.id===id);c.statut="paye";c.maj_le=maintenant();await ecrire("credits",c);toast("Crédit payé ✔");rendre("credits");}
+  if(act==="plus"||act==="moins"){if(!accesOk())return;const p=(await tout("produits")).find(x=>x.id===id);
+    p.quantite=Math.max(0,p.quantite+(act==="plus"?1:-1));p.maj_le=maintenant();await ecrire("produits",p);rendre("stock");}
+});
+
+// ---------- Synchronisation automatique avec la base en ligne ----------
+// Principe : chaque donnée a un identifiant unique créé sur le téléphone. En l'envoyant avec "upsert",
+// la même donnée envoyée deux fois ne crée jamais de doublon.
+const COLS={
+  clients:["id","user_id","nom","whatsapp","cree_le","maj_le"],
+  produits:["id","user_id","nom","quantite","seuil_alerte","prix_vente","note","cree_le","maj_le"],
+  ventes:["id","user_id","produit","montant","mode_paiement","client_id","note","cree_le","maj_le"],
+  depenses:["id","user_id","motif","montant","note","cree_le","maj_le"],
+  credits:["id","user_id","client_id","nom_client","whatsapp","montant","date_credit","date_limite","statut","note","maj_le"]
+};
+const ORDRE=["clients","produits","ventes","depenses","credits"]; // les clients d'abord (les crédits en dépendent)
+let syncEnCours=false,minuteur=null;
+
+async function majStatut(){
+  const el=document.getElementById("statut");let n=0;
+  try{if(baseLocale)n=(await tout("file_attente")).length}catch(e){}
+  if(syncEnCours){el.textContent="Synchronisation en cours";el.className="sync"}
+  else if(!navigator.onLine){el.textContent="Hors connexion"+(n?" · "+n+" à envoyer":"");el.className="off"}
+  else if(n>0){el.textContent="En attente d'envoi ("+n+")";el.className="sync"}
+  else{el.textContent="Synchronisé";el.className=""}
+}
+function planifierSync(){majStatut();clearTimeout(minuteur);minuteur=setTimeout(synchroniser,800)}
+
+// Renouvelle la connexion quand elle expire (Internet nécessaire)
+async function jeton(){
+  const ses=lireSession();let exp=0;
+  try{exp=JSON.parse(atob(ses.jeton.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"))).exp*1000}catch(e){}
+  if(exp>Date.now()+60000||!navigator.onLine)return ses.jeton;
+  const d=await sb("/auth/v1/token?grant_type=refresh_token",{methode:"POST",corps:{refresh_token:ses.refresh}});
+  garderSession(d);return d.access_token;
+}
+// Retire de la file d'attente seulement ce qui n'a pas changé pendant l'envoi
+function retirer(store,recs){return new Promise((ok,ko)=>{
+  const t=baseLocale.transaction([store,"file_attente"],"readwrite"),s=t.objectStore(store),f=t.objectStore("file_attente");
+  recs.forEach(r=>{s.get(r.id).onsuccess=e=>{const c=e.target.result;if(c&&c.maj_le===r.maj_le)f.delete(store+":"+r.id)}});
+  t.oncomplete=ok;t.onerror=()=>ko(t.error);})}
+function fusionner(store,lignes,bloques){return new Promise(async(ok,ko)=>{
+  const locaux=new Map((await tout(store)).map(o=>[o.id,o]));
+  const t=baseLocale.transaction(store,"readwrite"),s=t.objectStore(store);
+  lignes.forEach(l=>{if(bloques.has(store+":"+l.id))return;const c=locaux.get(l.id);
+    if(!c||new Date(l.maj_le)>new Date(c.maj_le))s.put(l);});
+  t.oncomplete=ok;t.onerror=()=>ko(t.error);})}
+
+async function synchroniser(){
+  if(syncEnCours||!baseLocale||!navigator.onLine||!lireSession())return;
+  syncEnCours=true;majStatut();
+  const debutSync=Date.now();
+  try{
+    const jt=await jeton();
+    // 1) ENVOYER ce qui est en attente sur le téléphone
+    const file=await tout("file_attente");let n=0;
+    for(const store of ORDRE){
+      const ids=new Set(file.filter(f=>f.store===store).map(f=>f.rid));if(!ids.size)continue;
+      const recs=(await tout(store)).filter(o=>ids.has(o.id));
+      const lignes=recs.map(o=>Object.fromEntries(COLS[store].map(c=>[c,o[c]===undefined?null:o[c]])));
+      for(let i=0;i<lignes.length;i+=100)
+        await sb("/rest/v1/"+store+"?on_conflict=id",{methode:"POST",corps:lignes.slice(i,i+100),jeton:jt,entetes:{Prefer:"resolution=merge-duplicates,return=minimal"}});
+      await retirer(store,recs);n+=recs.length;
+    }
+    if(n>0)await sb("/rest/v1/synchronisations",{methode:"POST",corps:{user_id:uid(),appareil:navigator.userAgent.slice(0,60),nb_elements:n},jeton:jt,entetes:{Prefer:"return=minimal"}});
+    // 2) RECEVOIR ce qui vient d'un autre téléphone (marge de 10 min pour les horloges)
+    const cle="cp_pull_"+uid(),depuis=new Date(Number(localStorage.getItem(cle)||0)-600000).toISOString();
+    const bloques=new Set((await tout("file_attente")).map(f=>f.id));
+    for(const store of ORDRE){
+      for(let k=0;;k+=1000){
+        const l=await sb("/rest/v1/"+store+"?select=*&maj_le=gt."+encodeURIComponent(depuis)+"&order=maj_le.asc&limit=1000&offset="+k,{jeton:jt});
+        await fusionner(store,l,bloques);if(l.length<1000)break;
+      }
+    }
+    localStorage.setItem(cle,String(debutSync));
+    localStorage.setItem("cp_derniere_synchro",new Date().toISOString());
+    const actif=document.querySelector("main.actif");if(actif)rendre(actif.id);
+  }catch(err){console.warn("Synchronisation reportée :",err.message)}
+  syncEnCours=false;majStatut();
+}
+addEventListener("online",()=>{majStatut();synchroniser()});
+addEventListener("offline",majStatut);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)synchroniser()});
+setInterval(()=>{if(baseLocale)synchroniser()},60000); // réessaie toutes les minutes
+
+// ---------- Abonnement ----------
+// À REMPLACER par TES vrais numéros de paiement (les commerçants y enverront 2 000 FCFA)
+const PAIEMENT={MTN:{nom:"MTN Mobile Money",numero:"672 67 07 40",titulaire:"BLAOGA EGRI BIENVENUE SIMON"},Orange:{nom:"Orange Money",numero:"690 61 20 22",titulaire:"BLAOGA EGRI BIENVENUE SIMON"}};
+let operateur=null;
+document.querySelectorAll("[data-op]").forEach(b=>b.addEventListener("click",()=>{
+  operateur=b.dataset.op;const p=PAIEMENT[operateur];
+  document.querySelectorAll("[data-op]").forEach(x=>x.style.borderColor=x===b?"var(--orange)":"var(--gris)");
+  const i=$("ab-instr");i.style.display="block";
+  i.innerHTML=`<b>Comment payer</b><br>1. Envoyez <b>2 000 FCFA</b> par ${p.nom} au <b>${esc(p.numero)}</b> (${esc(p.titulaire)}).<br>2. Gardez le SMS de confirmation.<br>3. Écrivez ci-dessous le numéro ou la référence de la transaction, puis appuyez sur « J'ai payé ».`;
+}));
+async function rAbonnement(){
+  $("ab-etat").textContent="";
+  if(!navigator.onLine){$("ab-etat").textContent="Il faut Internet pour s'abonner.";$("ab-form").style.display="none";$("ab-verif").style.display="none";return}
+  try{
+    const jt=await jeton(),id=uid();
+    const [ab]=await sb("/rest/v1/abonnements?select=fin_acces,statut&user_id=eq."+id,{jeton:jt});
+    const pay=await sb("/rest/v1/paiements?select=id&user_id=eq."+id+"&statut=eq.en_verification&limit=1",{jeton:jt});
+    const j=ab?joursRestants(ab.fin_acces):0;
+    $("ab-etat").textContent=j>0?(ab.statut==="actif"?"Abonnement actif : ":"Essai gratuit : ")+j+" jour"+(j>1?"s":"")+" restant"+(j>1?"s":""):"Votre accès est terminé. Vous pouvez consulter vos données, mais pas en ajouter.";
+    $("ab-verif").style.display=pay.length?"block":"none";$("ab-form").style.display=pay.length?"none":"block";
+  }catch(e){$("ab-etat").textContent="Impossible de charger. Réessayez."}
+}
+$("ab-paye").addEventListener("click",async()=>{
+  montrerErreur("e-ab","");const ref=$("ab-ref").value.trim();
+  if(!operateur)return montrerErreur("e-ab","Choisissez MTN Mobile Money ou Orange Money.");
+  if(ref.length<4)return montrerErreur("e-ab","Entrez le numéro ou la référence de la transaction.");
+  if(!navigator.onLine)return montrerErreur("e-ab","Il faut Internet pour envoyer votre paiement.");
+  $("ab-paye").disabled=true;
+  try{await sb("/rest/v1/paiements",{methode:"POST",corps:{user_id:uid(),operateur,montant:2000,reference:ref,statut:"en_verification"},jeton:await jeton(),entetes:{Prefer:"return=minimal"}});
+    $("ab-ref").value="";toast("Paiement en vérification ✔");}
+  catch(e){montrerErreur("e-ab","Un problème est survenu. Réessayez.")}
+  $("ab-paye").disabled=false;rAbonnement();
+});
+
+// ---------- Mon profil ----------
+function rProfil(){
+  const m=lireSession().user.user_metadata||{};
+  $("p-type").innerHTML=$("type").innerHTML;$("p-ville").innerHTML=$("ville").innerHTML;
+  $("p-nom").value=m.nom||"";$("p-boutique").value=m.boutique||"";$("p-type").value=m.type||"Autre";$("p-ville").value=m.ville||"Autre";
+}
+$("f-profil").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-profil","");
+  const nom=$("p-nom").value.trim(),boutique=$("p-boutique").value.trim();
+  if(nom.length<3||boutique.length<2)return montrerErreur("e-profil","Entrez votre nom et le nom de la boutique.");
+  if(!navigator.onLine)return montrerErreur("e-profil","Il faut Internet pour modifier le profil.");
+  try{
+    const jt=await jeton(),id=uid(),h={Prefer:"return=minimal"},data={nom,boutique,type:$("p-type").value,ville:$("p-ville").value};
+    await sb("/rest/v1/profils?id=eq."+id,{methode:"PATCH",corps:{nom},jeton:jt,entetes:h});
+    await sb("/rest/v1/boutiques?user_id=eq."+id,{methode:"PATCH",corps:{nom:boutique,type_commerce:data.type,ville:data.ville},jeton:jt,entetes:h});
+    await sb("/auth/v1/user",{methode:"PUT",corps:{data},jeton:jt});
+    const ses=lireSession();ses.user.user_metadata=Object.assign(ses.user.user_metadata||{},data);localStorage.setItem("cp_session",JSON.stringify(ses));
+    $("bienvenue").textContent="Bonjour, "+nom.split(" ")[0]+" !";$("t-boutique").textContent=boutique;toast("Profil enregistré ✔");
+  }catch(err){montrerErreur("e-profil","Un problème est survenu. Réessayez.")}
+});
+$("f-mdp").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-mdp","");
+  if($("p-mdp").value.length<6)return montrerErreur("e-mdp","Le mot de passe doit avoir au moins 6 caractères.");
+  if($("p-mdp").value!==$("p-mdp2").value)return montrerErreur("e-mdp","Les deux mots de passe sont différents.");
+  if(!navigator.onLine)return montrerErreur("e-mdp","Il faut Internet pour changer le mot de passe.");
+  try{await sb("/auth/v1/user",{methode:"PUT",corps:{password:$("p-mdp").value},jeton:await jeton()});e.target.reset();toast("Mot de passe changé ✔");}
+  catch(err){montrerErreur("e-mdp","Un problème est survenu. Réessayez.")}
+});
+$("deco2").addEventListener("click",()=>{localStorage.removeItem("cp_session");aller("accueil")});
+
+// ---------- Activité récente ----------
+async function rActivite(){
+  const [v,d,c]=await Promise.all([tout("ventes"),tout("depenses"),tout("credits")]);
+  const vide='<div class="vide">Rien pour le moment.</div>';
+  const liste=(l,f)=>l.length?parDate(l).slice(0,5).map(f).join(""):vide;
+  $("a-ventes").innerHTML=liste(v,x=>`<div class="it"><b>${esc(x.produit)}</b> · ${fcfa(x.montant)}<div class="sub">${quand(x.cree_le)}</div></div>`);
+  $("a-depenses").innerHTML=liste(d,x=>`<div class="it"><b>${esc(x.motif)}</b> · ${fcfa(x.montant)}<div class="sub">${quand(x.cree_le)}</div></div>`);
+  $("a-credits").innerHTML=liste(c.map(x=>({...x,cree_le:x.date_credit})),x=>`<div class="it"><b>${esc(x.nom_client)}</b> · ${fcfa(x.montant)}<div class="sub">${quand(x.cree_le)}</div></div>`);
+  const s=localStorage.getItem("cp_derniere_synchro");
+  $("a-sync").textContent=s?"Dernière synchronisation : "+quand(s):"Pas encore synchronisé.";
+}
+
+// ---------- Espace administrateur ----------
+// Sécurité : l'écran n'est qu'une façade. Chaque action est revérifiée par la base (fonction est_admin()).
+const un=x=>Array.isArray(x)?x[0]:x;
+async function rAdmin(){
+  if(!navigator.onLine){$("ad-paiements").innerHTML=$("ad-users").innerHTML='<div class="vide">Il faut Internet.</div>';return}
+  try{
+    const jt=await jeton();
+    const [p,u]=await Promise.all([
+      sb("/rest/v1/paiements?select=id,operateur,montant,reference,cree_le,profils(nom,telephone)&statut=eq.en_verification&order=cree_le.asc",{jeton:jt}),
+      sb("/rest/v1/profils?select=id,nom,telephone,bloque,boutiques(nom),abonnements(fin_acces,statut)&order=cree_le.desc",{jeton:jt})]);
+    $("ad-paiements").innerHTML=p.length?p.map(x=>{const pr=un(x.profils)||{};return `<div class="it"><b>${esc(pr.nom)}</b> · ${fcfa(x.montant)}<div class="sub">${esc(pr.telephone)} · ${esc(x.operateur)} · réf. ${esc(x.reference)} · ${quand(x.cree_le)}</div>
+      <button class="mini" data-adm="valider" data-id="${x.id}">Valider</button><button class="mini gr" data-adm="refuser" data-id="${x.id}">Refuser</button></div>`}).join(""):'<div class="vide">Aucun paiement à vérifier.</div>';
+    $("ad-users").innerHTML=u.map(x=>{const a=un(x.abonnements)||{},b=un(x.boutiques)||{},j=a.fin_acces?joursRestants(a.fin_acces):0;
+      return `<div class="it"><b>${esc(x.nom)}</b> · ${esc(b.nom)}<div class="sub">${esc(x.telephone)} · ${a.statut==="actif"?"Abonné":"Essai"} · fin le ${a.fin_acces?new Date(a.fin_acces).toLocaleDateString("fr-FR"):"?"} (${j>0?j+" j":"terminé"})${x.bloque?" · BLOQUÉ":""}</div>
+      <button class="mini" data-adm="prolonger" data-id="${x.id}">+30 jours</button><button class="mini ${x.bloque?"":"gr"}" data-adm="${x.bloque?"reactiver":"bloquer"}" data-id="${x.id}">${x.bloque?"Réactiver":"Bloquer"}</button></div>`}).join("");
+  }catch(e){$("ad-paiements").innerHTML='<div class="vide">Accès refusé ou erreur.</div>'}
+}
+const ACTIONS={valider:["admin_valider_paiement",i=>({p_id:i})],refuser:["admin_refuser_paiement",i=>({p_id:i})],
+  prolonger:["admin_prolonger",i=>({p_user:i})],bloquer:["admin_bloquer",i=>({p_user:i,p_bloque:true})],reactiver:["admin_bloquer",i=>({p_user:i,p_bloque:false})]};
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-adm]");if(!b)return;
+  const [fn,arg]=ACTIONS[b.dataset.adm];b.disabled=true;
+  try{await sb("/rest/v1/rpc/"+fn,{methode:"POST",corps:arg(b.dataset.id),jeton:await jeton()});toast("Fait ✔")}
+  catch(err){toast("Erreur : "+err.message)}
+  rAdmin();
+});
+
+document.getElementById("f-inscription").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-inscription","");
+  const v=id=>document.getElementById(id).value.trim();
+  const tel=normaliserTel(v("tel"));
+  if(v("nom").length<3)return montrerErreur("e-inscription","Entrez votre nom complet.");
+  if(!tel)return montrerErreur("e-inscription","Numéro invalide. Exemple : +237 6XX XX XX XX");
+  if(v("mdp").length<6)return montrerErreur("e-inscription","Le mot de passe doit avoir au moins 6 caractères.");
+  if(v("mdp")!==v("mdp2"))return montrerErreur("e-inscription","Les deux mots de passe sont différents.");
+  if(v("boutique").length<2)return montrerErreur("e-inscription","Entrez le nom de votre boutique.");
+  if(!navigator.onLine)return montrerErreur("e-inscription","Il faut Internet pour créer un compte.");
+  const bouton=e.target.querySelector("button[type=submit]");bouton.disabled=true;bouton.textContent="Création en cours…";
+  try{
+    const d=await sb("/auth/v1/signup",{methode:"POST",corps:{email:emailDe(tel),password:v("mdp"),
+      data:{nom:v("nom"),telephone:tel,boutique:v("boutique"),type:v("type"),ville:v("ville")}}});
+    if(!d.access_token)throw new Error("Confirmation d'email encore activée dans Supabase");
+    garderSession(d);ouvrirTableau();
+  }catch(err){montrerErreur("e-inscription",traduire(err.message))}
+  bouton.disabled=false;bouton.textContent="Créer mon compte";
+});
+
+document.getElementById("f-connexion").addEventListener("submit",async e=>{
+  e.preventDefault();montrerErreur("e-connexion","");
+  const tel=normaliserTel(document.getElementById("c-tel").value),mdp=document.getElementById("c-mdp").value;
+  if(!tel)return montrerErreur("e-connexion","Numéro invalide. Exemple : +237 6XX XX XX XX");
+  if(!mdp)return montrerErreur("e-connexion","Entrez votre mot de passe.");
+  if(!navigator.onLine)return montrerErreur("e-connexion","Il faut Internet pour se connecter sur ce téléphone.");
+  const bouton=e.target.querySelector("button[type=submit]");bouton.disabled=true;
+  try{
+    const d=await sb("/auth/v1/token?grant_type=password",{methode:"POST",corps:{email:emailDe(tel),password:mdp}});
+    garderSession(d);ouvrirTableau();
+  }catch(err){montrerErreur("e-connexion",traduire(err.message))}
+  bouton.disabled=false;
+});
+document.getElementById("oublie").addEventListener("click",()=>{aller("connexion");montrerErreur("e-connexion","Contactez le support Cahier Pro pour réinitialiser votre mot de passe.")});
+document.getElementById("deco").addEventListener("click",()=>{localStorage.removeItem("cp_session");aller("accueil")});
+
+// À l'ouverture : si déjà connecté, aller directement au tableau (même sans Internet)
+if(lireSession())ouvrirTableau();
+
+// ---------- Service Worker ----------
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js"));
+</script>
+</body>
+</html>
