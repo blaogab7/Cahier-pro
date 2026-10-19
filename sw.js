@@ -1,5 +1,5 @@
 // Service Worker de Cahier Pro : garde les écrans en cache pour ouvrir l'app sans Internet.
-const CACHE = "cahier-pro-v7";
+const CACHE = "cahier-pro-v8";
 const FICHIERS = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png"];
 
 self.addEventListener("install", e => {

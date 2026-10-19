@@ -67,6 +67,8 @@ h3{color:var(--vert);margin:22px 0 8px}
   <div class="logo"><svg viewBox="0 0 48 48"><rect x="6" y="4" width="36" height="40" rx="5" fill="#fff"/><rect x="22" y="4" width="3" height="40" fill="#f28c1e"/><rect x="28" y="14" width="9" height="3" fill="#0f4d2e"/><rect x="28" y="22" width="9" height="3" fill="#0f4d2e"/><rect x="28" y="30" width="9" height="3" fill="#0f4d2e"/></svg>Cahier Pro</div>
   <div><h1>Vos ventes, crédits et stock, dans un seul cahier.</h1><p>Marche même sans Internet.</p></div>
   <div>
+    <button class="btn orange inst" style="display:none">📲 Installer Cahier Pro</button>
+    <p id="inst-aide" style="display:none;font-size:15px;opacity:.9;margin:0 0 6px"></p>
     <button class="btn orange" data-va="inscription">Créer mon compte</button>
     <button class="btn blanc" data-va="connexion">Se connecter</button>
   </div>
@@ -122,7 +124,7 @@ h3{color:var(--vert);margin:22px 0 8px}
     <div class="carte" id="c-rupture"><div class="lib">Bientôt en rupture</div><div class="val" id="t-rupture">0</div></div>
     <div class="carte"><div class="lib">Jours restants</div><div class="val" id="t-jours">–</div></div>
   </div>
-  <div style="margin-top:14px"><button class="mini gr" data-va="activite">Activité récente</button><button class="mini gr" data-va="profil">Mon profil</button><button class="mini gr" data-va="abonnement">S'abonner</button><button class="mini or" id="b-admin" data-va="admin" style="display:none">Administration</button></div>
+  <div style="margin-top:14px"><button class="mini gr" data-va="activite">Activité récente</button><button class="mini gr" data-va="profil">Mon profil</button><button class="mini gr" data-va="abonnement">S'abonner</button><button class="mini inst" style="display:none">Installer l'app</button><button class="mini gr" id="b-partage">Partager Cahier Pro</button><button class="mini or" id="b-admin" data-va="admin" style="display:none">Administration</button></div>
 </main>
 
 
@@ -623,6 +625,29 @@ document.addEventListener("click",async e=>{
   try{await sb("/rest/v1/rpc/"+fn,{methode:"POST",corps:arg(b.dataset.id),jeton:await jeton()});toast("Fait ✔")}
   catch(err){toast("Erreur : "+err.message)}
   rAdmin();
+});
+
+// ---------- Installation facile + partage ----------
+let invite=null; // proposition d'installation donnée par Chrome
+const installee=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+const surIphone=/iphone|ipad|ipod/i.test(navigator.userAgent);
+function majInstall(){
+  const ok=!installee();
+  document.querySelectorAll(".inst").forEach(e=>e.style.display=(ok&&invite)?(e.classList.contains("mini")?"inline-block":"block"):"none");
+  const a=document.getElementById("inst-aide");
+  a.style.display=(ok&&!invite)?"block":"none";
+  a.textContent=surIphone?"Sur iPhone : ouvrez ce lien dans Safari, touchez Partager, puis « Sur l'écran d'accueil ».":"Pour installer : dans Chrome, touchez les 3 points ⋮ puis « Installer l'application ».";
+}
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();invite=e;majInstall()});
+addEventListener("appinstalled",()=>{invite=null;majInstall();toast("Cahier Pro est installé ✔")});
+document.querySelectorAll(".inst").forEach(b=>b.addEventListener("click",async()=>{
+  if(!invite)return;invite.prompt();await invite.userChoice;invite=null;majInstall();}));
+majInstall();
+document.getElementById("b-partage").addEventListener("click",async()=>{
+  const url=location.origin+location.pathname.replace(/index\.html$/,"");
+  const texte="Cahier Pro : remplacez votre cahier papier. Ventes, dépenses, crédits clients et stock, même sans Internet. 30 jours gratuits.";
+  try{if(navigator.share)await navigator.share({title:"Cahier Pro",text:texte,url});
+      else window.open("https://wa.me/?text="+encodeURIComponent(texte+" "+url),"_blank");}catch(e){}
 });
 
 document.getElementById("f-inscription").addEventListener("submit",async e=>{
